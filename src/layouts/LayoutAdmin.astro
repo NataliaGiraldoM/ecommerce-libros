@@ -1,0 +1,87 @@
+---
+import "../styles/global.css";
+interface Props {
+    titulo: string;
+}
+const { titulo } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{titulo} | Admin LibrosCol</title>
+    </head>
+    <body class="bg-gradient-to-br from-violet-50 via-fuchsia-50 to-purple-100 min-h-screen">
+        <nav class="bg-gradient-to-r from-violet-700 via-fuchsia-600 to-purple-700 text-white shadow-xl backdrop-blur">
+            <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+
+                <!-- Logo igual estilo inicio -->
+                <a href="/admin/dashboard" class="flex items-center gap-2 text-2xl tracking-tight">
+                    <span class="text-3xl">⚙️</span>
+                    <span class="bg-gradient-to-r from-pink-200 via-white to-violet-200 bg-clip-text text-transparent font-extrabold">
+                        Admin Elysian Books
+                    </span>
+                </a>
+
+                <!-- Menú igual estilo inicio -->
+                <div class="flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10 shadow-lg text-sm font-medium">
+
+                    <a
+                        href="/"
+                        class="px-4 py-2 rounded-xl text-base hover:bg-white/10 hover:text-pink-200 transition-all duration-300"
+                    >
+                         Inicio
+                    </a>
+
+                    <a
+                        href="/libros"
+                        class="px-4 py-2 rounded-xl text-base hover:bg-white/10 hover:text-pink-200 transition-all duration-300"
+                    >
+                         Catálogo
+                    </a>
+
+                    <span
+                        id="user-email"
+                        class="text-pink-200 text-xs hidden md:block px-2"
+                    ></span>
+
+                    <button
+                        id="btn-logout"
+                        class="px-4 py-2 rounded-xl text-base hover:bg-white/10 hover:text-pink-200 transition-all duration-300"
+                    >
+                        Cerrar sesión
+                    </button>
+
+                </div>
+            </div>
+        </nav>
+        <main class="max-w-7xl mx-auto px-4 py-8">
+            <slot />
+        </main>
+        <footer class="bg-gradient-to-r from-violet-900 via-purple-900 to-fuchsia-900 text-violet-100 text-center py-6 mt-12">
+            <p class="text-sm">© 2025 LibrosCol — Panel de administración</p>
+        </footer>
+        <script>
+            import { supabase } from "../lib/supabase";
+
+            const {
+                data: { session },
+            } = await supabase.auth.getSession();
+            if (session?.user?.email) {
+                const emailEl = document.getElementById("user-email");
+                if (emailEl) {
+                    emailEl.textContent = session.user.email;
+                    emailEl.classList.remove("hidden");
+                }
+            }
+
+            const btn = document.getElementById("btn-logout");
+            btn?.addEventListener("click", async () => {
+                await supabase.auth.signOut();
+                window.location.replace("/admin/login");
+            });
+        </script>
+    </body>
+</html>

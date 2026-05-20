@@ -1,0 +1,59 @@
+---
+import "../styles/global.css";
+
+interface Props {
+    titulo: string;
+    descripcion?: string;
+}
+
+const { titulo, descripcion = "La mejor librería online de Colombia" } =
+    Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{titulo} | Elysian Books</title>
+        <meta name="description" content={descripcion} />
+    </head>
+    <body class="bg-gradient-to-br from-violet-50 via-fuchsia-50 to-purple-100 min-h-screen text-gray-800">
+        <!-- Navbar -->
+        <nav class="bg-gradient-to-r from-violet-700 via-fuchsia-600 to-purple-700 text-white shadow-xl backdrop-blur">
+            <div
+                class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center"
+            >
+                <a href="/" class="flex items-center gap-2 text-2xl tracking-tight">
+                    <span class="text-3xl">☾</span>
+                    <span class="bg-gradient-to-r from-pink-200 via-white to-violet-200 bg-clip-text text-transparent font-extrabold">
+                         Elysian Books
+                    </span>
+                </a>
+                <div class="flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10 shadow-lg text-sm font-medium">
+                    <a
+                        href="/libros"
+                        class="px-4 py-2 rounded-xl text-base hover:bg-white/10 hover:text-pink-200 transition-all duration-300"
+                        > Catálogo</a
+                    >
+                    <a
+                        href="/admin/login"
+                        class="px-4 py-2 rounded-xl text-base hover:bg-white/10 hover:text-pink-200 transition-all duration-300"> Admin</a
+                    >
+                </div>
+            </div>
+        </nav>
+
+        <!-- Contenido de la página -->
+        <main class="max-w-7xl mx-auto px-4 py-8">
+            <slot />
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-gradient-to-r from-violet-900 via-purple-900 to-fuchsia-900 text-violet-100 text-center py-6 mt-12">
+            <p class="text-sm">
+                © 2026 Elysian Books — Todos los derechos reservados
+            </p>
+        </footer>
+    </body>
+</html>

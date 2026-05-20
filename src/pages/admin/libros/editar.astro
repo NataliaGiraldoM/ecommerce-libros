@@ -1,0 +1,336 @@
+---
+export const prerender = true;
+import LayoutAdmin from "../../../layouts/LayoutAdmin.astro";
+---
+
+<LayoutAdmin titulo="Editar Libro">
+    <div id="estado-carga" class="text-center py-16 text-gray-400">
+        <p class="text-4xl mb-4">⏳</p>
+        <p>Cargando libro...</p>
+    </div>
+
+    <div id="contenido" class="hidden max-w-2xl mx-auto">
+        <div class="flex items-center gap-4 mb-8">
+            <a
+                href="/admin/dashboard"
+                class="text-violet-500 hover:text-fuchsia-600 transition-colors font-medium"
+                >← Volver</a
+            >
+            <h1 class="text-2xl font-black text-violet-900 tracking-tight">Editar libro</h1>
+        </div>
+
+        <div
+            id="exito-msg"
+            class="hidden bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 text-sm"
+        >
+            ✅ Libro actualizado. Redirigiendo...
+        </div>
+
+        <div
+            id="error-msg"
+            class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm"
+        >
+        </div>
+
+        <div class="bg-white/70 backdrop-blur-md rounded-2xl shadow-lg p-8 border border-violet-100">
+            <form id="form-editar" class="flex flex-col gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                        >Título <span class="text-red-500">*</span></label
+                    >
+                    <input
+                        type="text"
+                        id="titulo"
+                        required
+                        class="w-full border border-violet-100 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-violet-400"
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                        >Autor <span class="text-red-500">*</span></label
+                    >
+                    <input
+                        type="text"
+                        id="autor"
+                        required
+                        class="w-full border border-violet-100 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-violet-400"
+                    />
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 mb-1"
+                            >Categoría <span class="text-red-500">*</span
+                            ></label
+                        >
+                        <input
+                            type="text"
+                            id="categoria"
+                            required
+                            class="w-full border border-violet-100 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-violet-400"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 mb-1"
+                            >Precio (COP) <span class="text-red-500">*</span
+                            ></label
+                        >
+                        <input
+                            type="number"
+                            id="precio"
+                            required
+                            min="0"
+                            class="w-full border border-violet-100 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-violet-400"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                        >Stock <span class="text-red-500">*</span></label
+                    >
+                    <input
+                        type="number"
+                        id="stock"
+                        required
+                        min="0"
+                        class="w-full border border-violet-100 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-violet-400"
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                        >Descripción</label
+                    >
+                    <textarea
+                        id="descripcion"
+                        rows="4"
+                        class="w-full border border-violet-100 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-violet-400"
+                    ></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                        >Imagen de portada</label
+                    >
+                    <div id="imagen-actual" class="hidden mb-3">
+                        <p class="text-xs text-gray-400 mb-2">Imagen actual:</p>
+                        <img
+                            id="img-actual"
+                            src=""
+                            alt="Imagen actual"
+                            class="h-40 object-contain rounded-lg border border-gray-200"
+                        />
+                        <button
+                            type="button"
+                            id="btn-quitar-imagen"
+                            class="mt-2 text-red-500 hover:text-red-700 text-sm font-medium"
+                        >
+                            Quitar imagen
+                        </button>
+                    </div>
+                    <input
+                        type="file"
+                        id="imagen"
+                        accept="image/*"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-violet-500 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-violet-100 file:text-violet-700 file:hover:bg-fuchsia-100 file:text-sm"
+                    />
+                    <div id="preview-container" class="hidden mt-3">
+                        <p class="text-xs text-gray-400 mb-2">Nueva imagen:</p>
+                        <img
+                            id="preview-img"
+                            src=""
+                            alt="Preview"
+                            class="h-40 object-contain rounded-lg border border-gray-200"
+                        />
+                    </div>
+                </div>
+
+                <button
+                    type="submit"
+                    id="btn-submit"
+                    class="bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white py-3 rounded-xl font-bold hover:from-violet-500 hover:to-fuchsia-500 transition-all duration-300 shadow-md hover:shadow-lg"
+                >
+                    Guardar cambios
+                </button>
+            </form>
+        </div>
+    </div>
+</LayoutAdmin>
+
+<script>
+    import { supabase } from "../../../lib/supabase";
+
+    let libroActual: any = null;
+    let imagenActualUrl: string | null = null;
+
+    // Obtener ID desde query params
+    const id = new URLSearchParams(window.location.search).get("id");
+
+    if (!id) window.location.replace("/admin/dashboard");
+
+    supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event !== "INITIAL_SESSION") return;
+
+        if (!session) {
+            window.location.replace("/admin/login");
+            return;
+        }
+
+        const { data: libro, error } = await supabase
+            .from("libros")
+            .select("*")
+            .eq("id", id)
+            .single();
+
+        if (error || !libro) {
+            window.location.replace("/admin/dashboard");
+            return;
+        }
+
+        libroActual = libro;
+        imagenActualUrl = libro.imagen_url;
+
+        document.getElementById("estado-carga")!.classList.add("hidden");
+        document.getElementById("contenido")!.classList.remove("hidden");
+
+        (document.getElementById("titulo") as HTMLInputElement).value =
+            libro.titulo;
+        (document.getElementById("autor") as HTMLInputElement).value =
+            libro.autor;
+        (document.getElementById("categoria") as HTMLInputElement).value =
+            libro.categoria;
+        (document.getElementById("precio") as HTMLInputElement).value =
+            libro.precio;
+        (document.getElementById("stock") as HTMLInputElement).value =
+            libro.stock;
+        (document.getElementById("descripcion") as HTMLTextAreaElement).value =
+            libro.descripcion ?? "";
+
+        if (imagenActualUrl) {
+            (document.getElementById("img-actual") as HTMLImageElement).src =
+                imagenActualUrl;
+            document
+                .getElementById("imagen-actual")!
+                .classList.remove("hidden");
+        }
+    });
+
+    document
+        .getElementById("btn-quitar-imagen")!
+        .addEventListener("click", () => {
+            imagenActualUrl = null;
+            document.getElementById("imagen-actual")!.classList.add("hidden");
+        });
+
+    const inputImagen = document.getElementById("imagen") as HTMLInputElement;
+    const previewContainer = document.getElementById("preview-container")!;
+    const previewImg = document.getElementById(
+        "preview-img",
+    ) as HTMLImageElement;
+
+    inputImagen.addEventListener("change", () => {
+        const archivo = inputImagen.files?.[0];
+        if (archivo) {
+            previewImg.src = URL.createObjectURL(archivo);
+            previewContainer.classList.remove("hidden");
+        } else {
+            previewContainer.classList.add("hidden");
+        }
+    });
+
+    const form = document.getElementById("form-editar") as HTMLFormElement;
+    const errorMsg = document.getElementById("error-msg") as HTMLDivElement;
+    const exitoMsg = document.getElementById("exito-msg") as HTMLDivElement;
+    const btnSubmit = document.getElementById(
+        "btn-submit",
+    ) as HTMLButtonElement;
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        errorMsg.classList.add("hidden");
+        btnSubmit.textContent = "Guardando...";
+        btnSubmit.disabled = true;
+
+        const titulo = (
+            document.getElementById("titulo") as HTMLInputElement
+        ).value.trim();
+        const autor = (
+            document.getElementById("autor") as HTMLInputElement
+        ).value.trim();
+        const categoria = (
+            document.getElementById("categoria") as HTMLInputElement
+        ).value.trim();
+        const precio = Number(
+            (document.getElementById("precio") as HTMLInputElement).value,
+        );
+        const stock = Number(
+            (document.getElementById("stock") as HTMLInputElement).value,
+        );
+        const descripcion = (
+            document.getElementById("descripcion") as HTMLTextAreaElement
+        ).value.trim();
+        const archivo = inputImagen.files?.[0];
+
+        let imagen_url: string | null = imagenActualUrl;
+
+        if (archivo) {
+            const extension = archivo.name.split(".").pop();
+            const nombreArchivo = `${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
+
+            const { error: errorStorage } = await supabase.storage
+                .from("libros-imagenes")
+                .upload(nombreArchivo, archivo, { upsert: false });
+
+            if (errorStorage) {
+                errorMsg.textContent =
+                    "Error al subir imagen: " + errorStorage.message;
+                errorMsg.classList.remove("hidden");
+                btnSubmit.textContent = "Guardar cambios";
+                btnSubmit.disabled = false;
+                return;
+            }
+
+            if (libroActual.imagen_url) {
+                const pathAnterior = libroActual.imagen_url.split(
+                    "/storage/v1/object/public/libros-imagenes/",
+                )[1];
+                if (pathAnterior)
+                    await supabase.storage
+                        .from("libros-imagenes")
+                        .remove([pathAnterior]);
+            }
+
+            const { data: urlData } = supabase.storage
+                .from("libros-imagenes")
+                .getPublicUrl(nombreArchivo);
+            imagen_url = urlData.publicUrl;
+        }
+
+        const { error: errorDB } = await supabase
+            .from("libros")
+            .update({
+                titulo,
+                autor,
+                categoria,
+                precio,
+                stock,
+                descripcion: descripcion || null,
+                imagen_url,
+            })
+            .eq("id", id);
+
+        if (errorDB) {
+            errorMsg.textContent = "Error al actualizar: " + errorDB.message;
+            errorMsg.classList.remove("hidden");
+            btnSubmit.textContent = "Guardar cambios";
+            btnSubmit.disabled = false;
+        } else {
+            exitoMsg.classList.remove("hidden");
+            setTimeout(() => window.location.replace("/admin/dashboard"), 1500);
+        }
+    });
+</script>

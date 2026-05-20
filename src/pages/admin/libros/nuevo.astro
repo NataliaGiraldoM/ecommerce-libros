@@ -1,0 +1,254 @@
+---
+export const prerender = true;
+import LayoutAdmin from "../../../layouts/LayoutAdmin.astro";
+---
+
+<LayoutAdmin titulo="Nuevo Libro">
+    <div class="max-w-2xl mx-auto">
+        <div class="flex items-center gap-4 mb-8">
+            <a
+                href="/admin/dashboard"
+                class="text-violet-500 hover:text-fuchsia-600 transition-colors font-medium"
+            >
+                ← Volver
+            </a>
+            <h1 class="text-2xl font-black text-violet-900 tracking-tight">Nuevo libro</h1>
+        </div>
+
+        <div
+            id="exito-msg"
+            class="hidden bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 text-sm"
+        >
+            ✅ Libro creado exitosamente. Redirigiendo...
+        </div>
+
+        <div
+            id="error-msg"
+            class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm"
+        >
+        </div>
+
+        <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl p-8 border border-violet-100">
+            <form id="form-nuevo" class="flex flex-col gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                        >Título <span class="text-red-500">*</span></label
+                    >
+                    <input
+                        type="text"
+                        id="titulo"
+                        required
+                        class="w-full border border-violet-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-fuchsia-400 focus:border-fuchsia-300 transition-all"
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                        >Autor <span class="text-red-500">*</span></label
+                    >
+                    <input
+                        type="text"
+                        id="autor"
+                        required
+                        class="w-full border border-violet-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-fuchsia-400 focus:border-fuchsia-300 transition-all"
+                    />
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 mb-1"
+                            >Categoría <span class="text-red-500">*</span
+                            ></label
+                        >
+                        <input
+                            type="text"
+                            id="categoria"
+                            required
+                            placeholder="Ej: Ficción, Historia..."
+                            class="w-full border border-violet-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-fuchsia-400 focus:border-fuchsia-300 transition-all"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 mb-1"
+                            >Precio (COP) <span class="text-red-500">*</span
+                            ></label
+                        >
+                        <input
+                            type="number"
+                            id="precio"
+                            required
+                            min="0"
+                            placeholder="Ej: 45000"
+                            class="w-full border border-violet-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-fuchsia-400 focus:border-fuchsia-300 transition-all"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                        >Stock <span class="text-red-500">*</span></label
+                    >
+                    <input
+                        type="number"
+                        id="stock"
+                        required
+                        min="0"
+                        value="0"
+                        class="w-full border border-violet-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-fuchsia-400 focus:border-fuchsia-300 transition-all"
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                        >Descripción</label
+                    >
+                    <textarea
+                        id="descripcion"
+                        rows="4"
+                        placeholder="Sinopsis del libro..."
+                        class="w-full border border-violet-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-fuchsia-400 focus:border-fuchsia-300 transition-all"
+                    ></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                        >Imagen de portada</label
+                    >
+                    <input
+                        type="file"
+                        id="imagen"
+                        accept="image/*"
+                        class="w-full border border-violet-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-fuchsia-400 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-fuchsia-100 file:text-fuchsia-800 file:text-sm"
+                    />
+                    <div id="preview-container" class="hidden mt-3">
+                        <img
+                            id="preview-img"
+                            src=""
+                            alt="Preview"
+                            class="h-40 object-contain rounded-lg border border-gray-200"
+                        />
+                    </div>
+                </div>
+
+                <button
+                    type="submit"
+                    id="btn-submit"
+                    class="bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white py-3 rounded-xl font-bold hover:from-violet-500 hover:to-fuchsia-500 transition-all duration-300 shadow-md hover:shadow-lg"
+                >
+                    Crear libro
+                </button>
+            </form>
+        </div>
+    </div>
+</LayoutAdmin>
+
+<script>
+    import { supabase } from "../../../lib/supabase";
+
+    // Verificar sesión
+    supabase.auth.onAuthStateChange((event, session) => {
+        if (!session) window.location.replace("/admin/login");
+    });
+
+    // Preview de imagen
+    const inputImagen = document.getElementById("imagen") as HTMLInputElement;
+    const previewContainer = document.getElementById("preview-container")!;
+    const previewImg = document.getElementById(
+        "preview-img",
+    ) as HTMLImageElement;
+
+    inputImagen.addEventListener("change", () => {
+        const archivo = inputImagen.files?.[0];
+        if (archivo) {
+            previewImg.src = URL.createObjectURL(archivo);
+            previewContainer.classList.remove("hidden");
+        } else {
+            previewContainer.classList.add("hidden");
+        }
+    });
+
+    // Envío del formulario
+    const form = document.getElementById("form-nuevo") as HTMLFormElement;
+    const errorMsg = document.getElementById("error-msg") as HTMLDivElement;
+    const exitoMsg = document.getElementById("exito-msg") as HTMLDivElement;
+    const btnSubmit = document.getElementById(
+        "btn-submit",
+    ) as HTMLButtonElement;
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        errorMsg.classList.add("hidden");
+        btnSubmit.textContent = "Guardando...";
+        btnSubmit.disabled = true;
+
+        const titulo = (
+            document.getElementById("titulo") as HTMLInputElement
+        ).value.trim();
+        const autor = (
+            document.getElementById("autor") as HTMLInputElement
+        ).value.trim();
+        const categoria = (
+            document.getElementById("categoria") as HTMLInputElement
+        ).value.trim();
+        const precio = Number(
+            (document.getElementById("precio") as HTMLInputElement).value,
+        );
+        const stock = Number(
+            (document.getElementById("stock") as HTMLInputElement).value,
+        );
+        const descripcion = (
+            document.getElementById("descripcion") as HTMLTextAreaElement
+        ).value.trim();
+        const archivo = inputImagen.files?.[0];
+
+        let imagen_url: string | null = null;
+
+        // 1. Subir imagen si existe
+        if (archivo) {
+            const extension = archivo.name.split(".").pop();
+            const nombreArchivo = `${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
+
+            const { error: errorStorage } = await supabase.storage
+                .from("libros-imagenes")
+                .upload(nombreArchivo, archivo, { upsert: false });
+
+            if (errorStorage) {
+                errorMsg.textContent =
+                    "Error al subir imagen: " + errorStorage.message;
+                errorMsg.classList.remove("hidden");
+                btnSubmit.textContent = "Crear libro";
+                btnSubmit.disabled = false;
+                return;
+            }
+
+            const { data: urlData } = supabase.storage
+                .from("libros-imagenes")
+                .getPublicUrl(nombreArchivo);
+
+            imagen_url = urlData.publicUrl;
+        }
+
+        // 2. Insertar en base de datos
+        const { error: errorDB } = await supabase.from("libros").insert({
+            titulo,
+            autor,
+            categoria,
+            precio,
+            stock,
+            descripcion: descripcion || null,
+            imagen_url,
+        });
+
+        if (errorDB) {
+            errorMsg.textContent = "Error al crear libro: " + errorDB.message;
+            errorMsg.classList.remove("hidden");
+            btnSubmit.textContent = "Crear libro";
+            btnSubmit.disabled = false;
+        } else {
+            exitoMsg.classList.remove("hidden");
+            setTimeout(() => window.location.replace("/admin/dashboard"), 1500);
+        }
+    });
+</script>

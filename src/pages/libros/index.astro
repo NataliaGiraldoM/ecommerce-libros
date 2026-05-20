@@ -1,0 +1,185 @@
+---
+import LayoutCatalogo from "../../layouts/LayoutCatalogo.astro";
+import { supabase } from "../../lib/supabase";
+
+const LIBROS_POR_PAGINA = 8;
+const paginaActual = Number(Astro.url.searchParams.get("pagina") ?? 1);
+const desde = (paginaActual - 1) * LIBROS_POR_PAGINA;
+const hasta = desde + LIBROS_POR_PAGINA - 1;
+const busqueda = Astro.url.searchParams.get("busqueda") ?? "";
+const categoria = Astro.url.searchParams.get("categoria") ?? "";
+
+let query = supabase.from("libros").select("*", { count: "exact" });
+if (busqueda) query = query.ilike("titulo", `%${busqueda}%`);
+if (categoria) query = query.eq("categoria", categoria);
+
+const { data: libros, count } = await query
+    .order("created_at", { ascending: false })
+    .range(desde, hasta);
+
+const totalPaginas = Math.ceil((count ?? 0) / LIBROS_POR_PAGINA);
+
+const { data: categoriasRaw } = await supabase
+    .from("libros")
+    .select("categoria");
+const categoriasUnicas: string[] = [
+    ...new Set(categoriasRaw?.map((l) => l.categoria as string) ?? []),
+];
+
+type Libro = {
+    id: string;
+    titulo: string;
+    autor: string;
+    precio: number;
+    categoria: string;
+    imagen_url: string | null;
+};
+
+// Pre-calcular URLs de paginación
+const urlAnterior = `/libros?pagina=${paginaActual - 1}&busqueda=${busqueda}&categoria=${categoria}`;
+const urlSiguiente = `/libros?pagina=${paginaActual + 1}&busqueda=${busqueda}&categoria=${categoria}`;
+const paginas = Array.from({ length: totalPaginas }, (_, i) => ({
+    num: i + 1,
+    url: `/libros?pagina=${i + 1}&busqueda=${busqueda}&categoria=${categoria}`,
+    activa: i + 1 === paginaActual,
+}));
+---
+
+<LayoutCatalogo titulo="Catálogo de Libros">
+    <div class="mb-8">
+        <h1 class="text-5xl font-extrabold text-violet-900 mb-2 tracking-tight">
+            Catálogo de Libros
+        </h1>
+        <p class="text-gray-500">{count} libros disponibles</p>
+    </div>
+
+    <!-- Búsqueda y filtros -->
+    <form
+        method="GET"
+        class="bg-white/80 backdrop-blur rounded-3xl shadow-xl border border-violet-100 p-5 mb-10 flex flex-col sm:flex-row gap-4"
+    >
+        <input
+            type="text"
+            name="busqueda"
+            value={busqueda}
+            placeholder="Buscar por título..."
+            class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-violet-400"
+        />
+        <select
+            name="categoria"
+            class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-violet-400"
+        >
+            <option value="">Todas las categorías</option>
+            {
+                categoriasUnicas.map((cat) => (
+                    <option value={cat} selected={cat === categoria}>
+                        {cat}
+                    </option>
+                ))
+            }
+        </select>
+        <button
+            type="submit"
+            class="bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white px-6 py-2 rounded-lg hover:opacity-90 transition-colors font-medium"
+        >
+            Buscar
+        </button>
+        {
+            (busqueda || categoria) && (
+                <a
+                    href="/libros"
+                    class="border border-gray-300 text-gray-600 px-6 py-2 rounded-lg hover:bg-gray-50 transition-colors text-center"
+                >
+                    Limpiar
+                </a>
+            )
+        }
+    </form>
+
+    <!-- Grid de libros -->
+    {
+        libros && libros.length > 0 ? (
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {(libros as Libro[]).map((libro) => (
+                    <a
+                        href={"/libros/" + libro.id}
+                        class="bg-white/90 backdrop-blur rounded-3xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden group border border-violet-100"
+                    >
+                        <div class="bg-gradient-to-br from-violet-100 to-fuchsia-100 h-48 flex items-center justify-center">
+                            {libro.imagen_url ? (
+                                <img
+                                    src={libro.imagen_url}
+                                    alt={libro.titulo}
+                                    class="h-full w-full object-cover"
+                                />
+                            ) : (
+                                <span class="text-6xl">📖</span>
+                            )}
+                        </div>
+                        <div class="p-4">
+                            <span class="text-xs bg-violet-100 text-violet-700 px-2 py-1 rounded-full">
+                                {libro.categoria}
+                            </span>
+                            <h3 class="font-bold text-gray-800 group-hover:text-fuchsia-600 transition-colors mt-2">
+                                {libro.titulo}
+                            </h3>
+                            <p class="text-gray-500 text-sm mt-1">
+                                {libro.autor}
+                            </p>
+                            <p class="text-fuchsia-600 font-bold mt-2">
+                                ${libro.precio.toLocaleString("es-CO")}
+                            </p>
+                        </div>
+                    </a>
+                ))}
+            </div>
+        ) : (
+            <div class="text-center py-16 text-gray-400">
+                <p class="text-5xl mb-4">🔍</p>
+                <p class="text-xl">No encontramos libros con esos filtros</p>
+                <a
+                    href="/libros"
+                    class="text-amber-700 hover:underline mt-2 inline-block"
+                >
+                    Ver todos los libros
+                </a>
+            </div>
+        )
+    }
+
+    <!-- Paginación -->
+    {
+        totalPaginas > 1 && (
+            <div class="flex justify-center gap-2 mt-8">
+                {paginaActual > 1 && (
+                    <a
+                        href={urlAnterior}
+                        class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                        Anterior
+                    </a>
+                )}
+                {paginas.map((p) => (
+                    <a
+                        href={p.url}
+                        class={
+                            p.activa
+                                ? "px-4 py-2 rounded-lg bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg"
+                                : "px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50"
+                        }
+                    >
+                        {p.num}
+                    </a>
+                ))}
+                {paginaActual < totalPaginas && (
+                    <a
+                        href={urlSiguiente}
+                        class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                        Siguiente
+                    </a>
+                )}
+            </div>
+        )
+    }
+</LayoutCatalogo>
